@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Você Linda Sempre - Loja da Re | Gestão de Lingerie</title>
+<!-- Google Fonts & FontAwesome -->
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<!-- Chart.js para Relatórios -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+:root {
+--bg-dark: #0d0d0d;
+--card-bg: #181818;
+--primary-red: #d32f2f;
+--dark-red: #8b0000;
+--bright-red: #ff1744;
+--text-light: #f5f5f5;
+--text-muted: #aaaaaa;
+--border-color: #333333;
+--success: #2ecc71;
+--warning: #f39c12;
+--info: #3498db;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+body { background-color: var(--bg-dark); color: var(--text-light); min-height: 100vh; }
+
+/* CABEÇALHO */
+header {
+background: linear-gradient(180deg, #000 0%, #1a0000 100%);
+border-bottom: 2px solid var(--primary-red);
+padding: 15px 30px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+position: sticky;
+top: 0;
+z-index: 1000;
+box-shadow: 0 4px 20px rgba(211, 47, 47, 0.2);
+}
+
+.brand-area { display: flex; align-items: center; gap: 15px; }
+.brand-area img { width: 55px; height: 55px; border-radius: 50%; border: 2px solid var(--primary-red); object-fit: cover; }
+.brand-title h1 { font-family: 'Playfair Display', serif; font-size: 1.6rem; color: #fff; }
+.brand-title span { font-size: 0.75rem; color: var(--bright-red); letter-spacing: 2px; text-transform: uppercase; font-weight: 600; }
+
+/* NAVEGAÇÃO */
+nav { display: flex; gap: 8px; overflow-x: auto; }
+.nav-btn {
+background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: var(--text-light);
+padding: 9px 16px; border-radius: 20px; cursor: pointer; font-size: 0.85rem; font-weight: 500; transition: all 0.3s; white-space: nowrap;
+}
+.nav-btn:hover, .nav-btn.active { background: var(--primary-red); color: #fff; border-color: var(--bright-red); box-shadow: 0 0 12px rgba(211, 47, 47, 0.6); }
+
+.cart-btn-badge {
+background: var(--bright-red); color: #fff; border-radius: 50%; padding: 2px 7px; font-size: 0.75rem; font-weight: 700; margin-left: 5px;
+}
+
+main { max-width: 1250px; margin: 30px auto; padding: 0 20px; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+h2.page-title {
+font-family: 'Playfair Display', serif; font-size: 1.9rem; color: var(--bright-red);
+margin-bottom: 20px; border-bottom: 1px solid var(--dark-red); padding-bottom: 8px;
+display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+}
+
+/* BOTÕES & FORMULÁRIOS */
+.btn-action {
+background: var(--primary-red); color: #fff; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: background 0.2s; font-size: 0.88rem;
+}
+.btn-action:hover { background: var(--bright-red); }
+.btn-secondary { background: #333; color: #fff; border: 1px solid #555; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; }
+.btn-secondary:hover { background: #444; }
+.btn-danger { background: #c0392b; color: #fff; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 0.8rem; }
+.btn-danger:hover { background: #e74c3c; }
+
+.search-box {
+background: #222; border: 1px solid var(--border-color); color: #fff; padding: 10px 15px; border-radius: 8px; width: 100%; max-width: 350px; outline: none; font-size: 0.9rem;
+}
+.search-box:focus { border-color: var(--bright-red); }
+
+.form-grid {
+display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;
+background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 25px;
+}
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-group label { font-size: 0.85rem; color: var(--text-muted); }
+.form-group input, .form-group select { background: #222; border: 1px solid var(--border-color); color: #fff; padding: 10px; border-radius: 6px; outline: none; }
+.form-group input:focus, .form-group select:focus { border-color: var(--primary-red); }
+
+/* VITRINE DE CARDS (CLEAN / SEM FOTO) */
+.products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
+.product-card {
+background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border-color);
+padding: 20px; display: flex; flex-direction: column; justify-content: space-between;
+transition: all 0.2s ease;
+}
+.product-card:hover { border-color: var(--bright-red); box-shadow: 0 4px 15px rgba(211, 47, 47, 0.2); }
+.product-code { font-size: 0.75rem; color: var(--bright-red); font-weight: 700; text-transform: uppercase; margin-bottom: 5px; }
+.product-name { font-size: 1.15rem; color: #fff; font-weight: 600; margin-bottom: 8px; }
+.product-price { font-size: 1.3rem; color: var(--bright-red); font-weight: 700; margin-bottom: 12px; }
+.product-stock { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 15px; }
+
+/* TABELAS */
+.table-container { background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border-color); overflow-x: auto; padding: 15px; }
+table { width: 100%; border-collapse: collapse; text-align: left; }
+th, td { padding: 12px 14px; border-bottom: 1px solid #282828; font-size: 0.88rem; }
+th { background: #222; color: var(--bright-red); }
+
+/* MODAL / FECHAR VENDA */
+.modal-overlay {
+position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85);
+display: none; justify-content: center; align-items: center; z-index: 2000; padding: 20px;
+}
+.modal-box {
+background: var(--card-bg); border: 2px solid var(--primary-red); border-radius: 14px; width: 100%; max-width: 550px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+}
+.modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px; }
+.modal-header h3 { color: var(--bright-red); font-family: 'Playfair Display', serif; }
+.close-modal { background: none; border: none; color: #aaa; font-size: 1.5rem; cursor: pointer; }
+
+.cart-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px dashed #333; font-size: 0.9rem; }
+
+.badge { padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }
+.badge-paid { background: rgba(46, 204, 113, 0.2); color: var(--success); }
+.badge-pending { background: rgba(243, 156, 18, 0.2); color: var(--warning); }
+.badge-home { background: rgba(52, 152, 219, 0.2); color: var(--info); }
+
+.empty-msg { text-align: center; padding: 30px; color: var(--text-muted); font-size: 0.95rem; }
+
+footer { text-align: center; padding: 25px; color: var(--text-muted); font-size: 0.85rem; border-top: 1px solid var(--border-color); margin-top: 50px; }
+</style>
+</head>
+<body>
+
+<header>
+<div class="brand-area">
+<img src="image.png" alt="Você Linda Sempre">
+<div class="brand-title">
+<h1>Você Linda Sempre</h1>
+<span>Loja da Re • Lingeries</span>
+</div>
+</div>
+<nav>
+<button class="nav-btn active" onclick="showTab('vitrine')"><i class="fa-solid fa-store"></i> Produtos & Venda</button>
+<button class="nav-btn" onclick="openCartModal()"><i class="fa-solid fa-cart-shopping"></i> Sacola <span class="cart-btn-badge" id="cartCount">0</span></button>
+<button class="nav-btn" onclick="showTab('clientes')"><i class="fa-solid fa-users"></i> Clientes</button>
+<button class="nav-btn" onclick="showTab('estoque')"><i class="fa-solid fa-boxes-stacked"></i> Estoque</button>
+<button class="nav-btn" onclick="showTab('vendas_mes')"><i class="fa-solid fa-receipt"></i> Vendas</button>
+<button class="nav-btn" onclick="showTab('consignado')"><i class="fa-solid fa-bag-shopping"></i> Em Provador</button>
+<button class="nav-btn" onclick="showTab('relatorios')"><i class="fa-solid fa-chart-line"></i> Relatórios</button>
+</nav>
+</header>
+
+<main>
+<!-- 1. VITRINE DE PRODUTOS (SEM FOTOS) -->
+<section id="vitrine" class="tab-panel active">
+<h2 class="page-title">
+Vitrine de Lingeries
+<button class="btn-action" onclick="openCartModal()"><i class="fa-solid fa-bag-shopping"></i> Abrir Sacola (<span id="cartTotalHeader">R$ 0,00</span>)</button>
+</h2>
+<div class="products-grid" id="vitrineGrid"></div>
+</section>
+
+<!-- 2. CLIENTES COM BUSCA -->
+<section id="clientes" class="tab-panel">
+<h2 class="page-title">
+Banco de Clientes
+<button class="btn-action" onclick="toggleElement('clientFormBox')">+ Novo Cliente</button>
+</h2>
+
+<div style="margin-bottom: 20px;">
+<input type="text" class="search-box" id="searchClientInput" placeholder="🔍 Pesquisar cliente por nome..." onkeyup="filterClients()">
+</div>
+
+<div id="clientFormBox" style="display:none;" class="form-grid">
+<div class="form-group">
+<label>Nome Completo</label>
+<input type="text" id="cliName" placeholder="Ex: Maria Silva">
+</div>
+<div class="form-group">
+<label>Telefone / WhatsApp</label>
+<input type="text" id="cliPhone" placeholder="(34) 99999-9999">
+</div>
+<div class="form-group" style="justify-content: flex-end;">
+<button class="btn-action" onclick="addClient()">Salvar Cliente</button>
+</div>
+</div>
+
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>Nome Completo</th>
+<th>Telefone</th>
+<th>Compras Realizadas</th>
+<th>Total Gasto</th>
+</tr>
+</thead>
+<tbody id="clientsTable"></tbody>
+</table>
+</div>
+</section>
+
+<!-- 3. ESTOQUE, REPOSIÇÃO E EDIÇÃO -->
+<section id="estoque" class="tab-panel">
+<h2 class="page-title">
+Gerenciamento do Estoque
+<div>
+<button class="btn-secondary" onclick="toggleElement('reporFormBox')">📦 Repor Peça Existente</button>
+<button class="btn-action" onclick="openNewProductForm()">+ Cadastrar Nova Peça</button>
+</div>
+</h2>
+
+<!-- FORMULÁRIO DE REPOSIÇÃO RÁPIDA -->
+<div id="reporFormBox" style="display:none;" class="form-grid">
+<div class="form-group">
+<label>Escolha a Peça para Repor</label>
+<select id="reporSelectProd"></select>
+</div>
+<div class="form-group">
+<label>Quantidade que Chegou</label>
+<input type="number" id="reporQty" value="5" min="1">
+</div>
+<div class="form-group" style="justify-content: flex-end;">
+<button class="btn-action" onclick="execReporStock()">Confirmar Entrada no Estoque</button>
+</div>
+</div>
+
+<!-- FORMULÁRIO DE NOVO PRODUTO / EDIÇÃO -->
+<div id="productFormBox" style="display:none;" class="form-grid">
+<input type="hidden" id="editProdId">
+<div class="form-group">
+<label>Código da Peça (3 dígitos)</label>
+<input type="text" id="prodCode" placeholder="Ex: 111, 112, 120">
+</div>
+<div class="form-group">
+<label>Nome da Lingerie</label>
+<input type="text" id="prodName" placeholder="Ex: Conjunto Renda Carmim">
+</div>
+<div class="form-group">
+<label>Preço Custo (R$)</label>
+<input type="number" step="0.01" id="prodCost" placeholder="0.00">
+</div>
+<div class="form-group">
+<label>Preço Venda (R$)</label>
+<input type="number" step="0.01" id="prodPrice" placeholder="0.00">
+</div>
+<div class="form-group">
+<label>Estoque Inicial</label>
+<input type="number" id="prodStock" value="5">
+</div>
+<div class="form-group" style="justify-content: flex-end;">
+<button class="btn-action" onclick="saveProduct()">Salvar Peça</button>
+</div>
+</div>
+
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>Código</th>
+<th>Produto</th>
+<th>Custo (R$)</th>
+<th>Venda (R$)</th>
+<th>Estoque Atual</th>
+<th>Ações</th>
+</tr>
+</thead>
+<tbody id="stockTable"></tbody>
+</table>
+</div>
+</section>
+
+<!-- 4. VENDAS DO MÊS (CALENDÁRIO DINÂMICO) -->
+<section id="vendas_mes" class="tab-panel">
+<h2 class="page-title">
+Histórico de Vendas
+<button class="btn-secondary" onclick="exportToCSV()"><i class="fa-solid fa-file-excel"></i> Baixar Planilha (.CSV)</button>
+</h2>
+
+<div class="form-grid" style="margin-bottom: 15px;">
+<div class="form-group">
+<label>Filtrar por Mês/Ano (Dinâmico)</label>
+<select id="monthFilter" onchange="renderSalesMonth()"></select>
+</div>
+</div>
+
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>Data</th>
+<th>Cliente</th>
+<th>Itens Vendidos</th>
+<th>Total (R$)</th>
+<th>Pagamento</th>
+<th>Status</th>
+<th>Ação</th>
+</tr>
+</thead>
+<tbody id="salesMonthTable"></tbody>
+</table>
+</div>
+</section>
+
+<!-- 5. LEVOU PARA EXPERIMENTAR -->
+<section id="consignado" class="tab-panel">
+<h2 class="page-title">Peças no Provador / Casa do Cliente</h2>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>Cliente</th>
+<th>Telefone</th>
+<th>Itens Levados</th>
+<th>Data Retirada</th>
+<th>Ação</th>
+</tr>
+</thead>
+<tbody id="consignadoTable"></tbody>
+</table>
+</div>
+</section>
+
+<!-- 6. RELATÓRIOS -->
+<section id="relatorios" class="tab-panel">
+<h2 class="page-title">Relatório de Desempenho e Lucro</h2>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px;">
+<div class="table-container">
+<h3 style="margin-bottom: 15px; color: var(--bright-red);">Peças Mais Vendidas (Ranking)</h3>
+<canvas id="chartTopProducts"></canvas>
+</div>
+<div class="table-container">
+<h3 style="margin-bottom: 15px; color: var(--bright-red);">Faturamento por Mês</h3>
+<canvas id="chartProfitCompare"></canvas>
+</div>
+</div>
+</section>
+</main>
+
+<!-- MODAL CONFIRMAR VENDA / SACOLA -->
+<div class="modal-overlay" id="cartModal">
+<div class="modal-box">
+<div class="modal-header">
+<h3>Sacola de Vendas</h3>
+<button class="close-modal" onclick="closeCartModal()">&times;</button>
+</div>
+
+<div id="cartItemsList" style="max-height: 220px; overflow-y: auto; margin-bottom: 15px;"></div>
+
+<div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 1.1rem; color: var(--bright-red); margin-bottom: 20px;">
+<span>Total da Sacola:</span>
+<span id="modalCartTotal">R$ 0,00</span>
+</div>
+
+<div class="form-group" style="margin-bottom: 12px;">
+<label>Pesquisar / Selecionar Cliente</label>
+<input type="text" placeholder="Digite para filtrar cliente..." onkeyup="filterModalClients(this.value)" style="margin-bottom: 6px;">
+<select id="modalClientSelect"></select>
+</div>
+
+<div class="form-group" style="margin-bottom: 15px;">
+<label>Forma de Pagamento</label>
+<select id="modalPaymentSelect">
+<option value="Dinheiro">Dinheiro (Pago)</option>
+<option value="Débito">Cartão de Débito (Pago)</option>
+<option value="Crédito">Cartão de Crédito (Pendente)</option>
+<option value="A Prazo">A Prazo / Fiado (Pendente)</option>
+<option value="Experimentar">Levou para Experimentar (Casa)</option>
+</select>
+</div>
+
+<button class="btn-action" style="width: 100%; padding: 12px;" onclick="confirmCheckout()"><i class="fa-solid fa-check"></i> Finalizar Venda e Dar Baixa</button>
+</div>
+</div>
+
+<footer>
+<p>&copy; 2026 Você Linda Sempre (Loja da Re). Todos os direitos reservados.</p>
+</footer>
+
+<script>
+// BANCO DE DADOS INICIALIZADO TOTALMENTE ZERADO
+let clients = JSON.parse(localStorage.getItem('vls_clients')) || [];
+let products = JSON.parse(localStorage.getItem('vls_products')) || [];
+let sales = JSON.parse(localStorage.getItem('vls_sales')) || [];
+let cart = [];
+
+function saveData() {
+localStorage.setItem('vls_clients', JSON.stringify(clients));
+localStorage.setItem('vls_products', JSON.stringify(products));
+localStorage.setItem('vls_sales', JSON.stringify(sales));
+}
+
+// NAVEGAÇÃO DE ABAS
+function showTab(tabId) {
+document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+document.getElementById(tabId).classList.add('active');
+
+if(tabId === 'vitrine') renderVitrine();
+if(tabId === 'clientes') renderClients();
+if(tabId === 'estoque') { renderStock(); prepareReporSelect(); }
+if(tabId === 'vendas_mes') { setupMonthFilter(); renderSalesMonth(); }
+if(tabId === 'consignado') renderConsignado();
+if(tabId === 'relatorios') renderReports();
+}
+
+function toggleElement(id) {
+const el = document.getElementById(id);
+el.style.display = el.style.display === 'none' ? 'grid' : 'none';
+}
+
+// GERAR OPÇÕES DE MÊS DINAMICAMENTE
+function setupMonthFilter() {
+const select = document.getElementById('monthFilter');
+if(select.children.length > 0) return;
+
+const monthsNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+const now = new Date();
+
+for(let i = 0; i < 12; i++) {
+let d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+let mVal = `${String(d.getMonth() + 1).padStart(2, '0')}-${d.getFullYear()}`;
+let mText = `${monthsNames[d.getMonth()]} / ${d.getFullYear()}`;
+select.innerHTML += `<option value="${mVal}">${mText}</option>`;
+}
+}
+
+// VITRINE CLEAN (SEM FOTO)
+function renderVitrine() {
+const grid = document.getElementById('vitrineGrid');
+grid.innerHTML = '';
+
+if(products.length === 0) {
+grid.innerHTML = `<div class="empty-msg" style="grid-column: 1/-1;">Nenhuma peça cadastrada ainda! Vá na aba <strong>Estoque</strong> para cadastrar suas lingeries.</div>`;
+updateCartHeader();
+return;
+}
+
+products.forEach(p => {
+grid.innerHTML += `
+<div class="product-card">
+<div>
+<div class="product-code">CÓD: ${p.code || 'S/N'}</div>
+<div class="product-name">${p.name}</div>
+<div class="product-price">R$ ${p.price.toFixed(2)}</div>
+<div class="product-stock">Disponível: <strong>${p.stock} un.</strong></div>
+</div>
+<button class="btn-action" style="width:100%; margin-top: 10px;" onclick="addToCart(${p.id})" ${p.stock === 0 ? 'disabled' : ''}>
+${p.stock === 0 ? 'Esgotado' : '+ Adicionar à Sacola'}
+</button>
+</div>
+`;
+});
+updateCartHeader();
+}
+
+// GERENCIAR SACOLA / CARRINHO
+function addToCart(pId) {
+const prod = products.find(p => p.id === pId);
+const inCart = cart.find(item => item.id === pId);
+
+if(inCart) {
+if(inCart.qty < prod.stock) inCart.qty++;
+else alert("Quantidade máxima disponível em estoque atingida.");
+} else {
+cart.push({ id: prod.id, name: prod.name, price: prod.price, cost: prod.cost, qty: 1 });
+}
+updateCartHeader();
+}
+
+function removeFromCart(pId) {
+cart = cart.filter(item => item.id !== pId);
+openCartModal();
+updateCartHeader();
+}
+
+function updateCartHeader() {
+const count = cart.reduce((acc, item) => acc + item.qty, 0);
+const total = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
+document.getElementById('cartCount').innerText = count;
+document.getElementById('cartTotalHeader').innerText = `R$ ${total.toFixed(2)}`;
+}
+
+function openCartModal() {
+if(cart.length === 0) return alert("Sua sacola está vazia! Clique em '+ Adicionar à Sacola' em algum produto.");
+const list = document.getElementById('cartItemsList');
+list.innerHTML = '';
+let total = 0;
+
+cart.forEach(item => {
+const itemTotal = item.price * item.qty;
+total += itemTotal;
+list.innerHTML += `
+<div class="cart-item">
+<div>
+<strong>${item.name}</strong> (${item.qty}x)
+<br><small style="color:#aaa;">R$ ${item.price.toFixed(2)} cada</small>
+</div>
+<div style="display:flex; align-items:center; gap:10px;">
+<span style="color:var(--bright-red); font-weight:600;">R$ ${itemTotal.toFixed(2)}</span>
+<button class="btn-danger" onclick="removeFromCart(${item.id})"><i class="fa-solid fa-trash"></i></button>
+</div>
+</div>
+`;
+});
+
+document.getElementById('modalCartTotal').innerText = `R$ ${total.toFixed(2)}`;
+filterModalClients('');
+document.getElementById('cartModal').style.display = 'flex';
+}
+
+function closeCartModal() {
+document.getElementById('cartModal').style.display = 'none';
+}
+
+function filterModalClients(query) {
+const select = document.getElementById('modalClientSelect');
+select.innerHTML = '';
+const filtered = clients.filter(c => c.name.toLowerCase().includes(query.toLowerCase()));
+
+if(filtered.length === 0) {
+select.innerHTML = `<option value="">Nenhum cliente encontrado (Cadastre na aba Clientes)</option>`;
+return;
+}
+
+filtered.forEach(c => select.innerHTML += `<option value="${c.id}">${c.name} (${c.phone || 'Sem tel'})</option>`);
+}
+
+function confirmCheckout() {
+const cId = parseInt(document.getElementById('modalClientSelect').value);
+const pay = document.getElementById('modalPaymentSelect').value;
+
+if(!cId) return alert("Selecione um cliente para finalizar a venda.");
+
+let status = 'Pago';
+if(pay === 'Crédito' || pay === 'A Prazo') status = 'Pendente';
+if(pay === 'Experimentar') status = 'Em Provador';
+
+const today = new Date();
+const dateStr = today.toISOString().split('T')[0];
+const monthYear = `${String(today.getMonth() + 1).padStart(2, '0')}-${today.getFullYear()}`;
+
+cart.forEach(item => {
+const prod = products.find(p => p.id === item.id);
+if(prod) prod.stock -= item.qty;
+
+sales.push({
+id: Date.now() + Math.random(),
+clientId: cId,
+productId: item.id,
+qty: item.qty,
+total: item.price * item.qty,
+costTotal: item.cost * item.qty,
+payment: pay,
+status: status,
+date: dateStr,
+monthYear: monthYear
+});
+});
+
+saveData();
+alert("Venda/Saída registrada com sucesso!");
+cart = [];
+closeCartModal();
+renderVitrine();
+}
+
+// BANCO DE CLIENTES
+function addClient() {
+const name = document.getElementById('cliName').value;
+const phone = document.getElementById('cliPhone').value;
+if(!name) return alert("Digite o nome completo do cliente.");
+
+clients.push({ id: Date.now(), name: name, phone: phone });
+saveData();
+renderClients();
+document.getElementById('cliName').value = '';
+document.getElementById('cliPhone').value = '';
+toggleElement('clientFormBox');
+}
+
+function renderClients(filter = '') {
+const tbody = document.getElementById('clientsTable');
+tbody.innerHTML = '';
+
+const filtered = clients.filter(c => c.name.toLowerCase().includes(filter.toLowerCase()));
+
+if(filtered.length === 0) {
+tbody.innerHTML = `<tr><td colspan="4" class="empty-msg">Nenhum cliente cadastrado.</td></tr>`;
+return;
+}
+
+filtered.forEach(c => {
+const cSales = sales.filter(s => s.clientId === c.id && s.status !== 'Em Provador');
+const totalSpent = cSales.reduce((acc, s) => acc + s.total, 0);
+
+tbody.innerHTML += `
+<tr>
+<td><strong>${c.name}</strong></td>
+<td>${c.phone || 'Não informado'}</td>
+<td>${cSales.length} compras</td>
+<td style="color: var(--bright-red); font-weight:600;">R$ ${totalSpent.toFixed(2)}</td>
+</tr>
+`;
+});
+}
+
+function filterClients() {
+const query = document.getElementById('searchClientInput').value;
+renderClients(query);
+}
+
+// ESTOQUE, ENTRADA E EDIÇÃO
+function openNewProductForm() {
+document.getElementById('editProdId').value = '';
+document.getElementById('prodCode').value = '';
+document.getElementById('prodName').value = '';
+document.getElementById('prodCost').value = '';
+document.getElementById('prodPrice').value = '';
+document.getElementById('prodStock').value = '5';
+document.getElementById('productFormBox').style.display = 'grid';
+}
+
+function prepareReporSelect() {
+const sel = document.getElementById('reporSelectProd');
+sel.innerHTML = '';
+if(products.length === 0) {
+sel.innerHTML = `<option value="">Nenhum produto em estoque</option>`;
+return;
+}
+products.forEach(p => {
+sel.innerHTML += `<option value="${p.id}">[Cód: ${p.code}] ${p.name} (Atual: ${p.stock} un.)</option>`;
+});
+}
+
+function execReporStock() {
+const pId = parseInt(document.getElementById('reporSelectProd').value);
+const qty = parseInt(document.getElementById('reporQty').value);
+const prod = products.find(p => p.id === pId);
+
+if(prod && qty > 0) {
+prod.stock += qty;
+saveData();
+alert(`Estoque da peça "${prod.name}" atualizado para ${prod.stock} un.`);
+renderStock();
+toggleElement('reporFormBox');
+}
+}
+
+function saveProduct() {
+const editId = document.getElementById('editProdId').value;
+const code = document.getElementById('prodCode').value;
+const name = document.getElementById('prodName').value;
+const cost = parseFloat(document.getElementById('prodCost').value) || 0;
+const price = parseFloat(document.getElementById('prodPrice').value);
+const stock = parseInt(document.getElementById('prodStock').value) || 0;
+
+if(!name || isNaN(price)) return alert("Preencha o nome e o preço de venda da lingerie.");
+
+if(editId) {
+const p = products.find(prod => prod.id === parseInt(editId));
+p.code = code; p.name = name; p.cost = cost; p.price = price; p.stock = stock;
+} else {
+products.push({
+id: Date.now(),
+code: code || "100",
+name: name,
+cost: cost,
+price: price,
+stock: stock
+});
+}
+
+saveData();
+renderStock();
+document.getElementById('productFormBox').style.display = 'none';
+}
+
+function editProduct(pId) {
+const p = products.find(prod => prod.id === pId);
+if(p) {
+document.getElementById('editProdId').value = p.id;
+document.getElementById('prodCode').value = p.code || '';
+document.getElementById('prodName').value = p.name;
+document.getElementById('prodCost').value = p.cost;
+document.getElementById('prodPrice').value = p.price;
+document.getElementById('prodStock').value = p.stock;
+document.getElementById('productFormBox').style.display = 'grid';
+}
+}
+
+function renderStock() {
+const tbody = document.getElementById('stockTable');
+tbody.innerHTML = '';
+
+if(products.length === 0) {
+tbody.innerHTML = `<tr><td colspan="6" class="empty-msg">Nenhuma lingerie cadastrada no estoque.</td></tr>`;
+return;
+}
+
+products.forEach(p => {
+tbody.innerHTML += `
+<tr>
+<td><strong>${p.code || '-'}</strong></td>
+<td>${p.name}</td>
+<td>R$ ${p.cost.toFixed(2)}</td>
+<td>R$ ${p.price.toFixed(2)}</td>
+<td><strong>${p.stock} un.</strong></td>
+<td><button class="btn-secondary" style="padding:4px 8px; font-size:0.75rem;" onclick="editProduct(${p.id})">✏️ Editar</button></td>
+</tr>
+`;
+});
+}
+
+// HISTÓRICO VENDAS DO MÊS
+function renderSalesMonth() {
+setupMonthFilter();
+const month = document.getElementById('monthFilter').value;
+const tbody = document.getElementById('salesMonthTable');
+tbody.innerHTML = '';
+
+const mSales = sales.filter(s => s.monthYear === month);
+
+if(mSales.length === 0) {
+tbody.innerHTML = `<tr><td colspan="7" class="empty-msg">Nenhuma venda realizada neste mês.</td></tr>`;
+return;
+}
+
+mSales.forEach(s => {
+const c = clients.find(cli => cli.id === s.clientId) || { name: 'Desconhecido' };
+const p = products.find(prod => prod.id === s.productId) || { name: 'Peça Removida' };
+
+let badge = `<span class="badge badge-paid">Pago</span>`;
+let actionBtn = '';
+
+if(s.status === 'Pendente') {
+badge = `<span class="badge badge-pending">Pendente</span>`;
+actionBtn = `<button class="btn-action" style="padding:4px 8px; font-size:0.75rem;" onclick="markAsPaid(${s.id})">Marcar Pago</button>`;
+} else if(s.status === 'Em Provador') {
+badge = `<span class="badge badge-home">Em Casa</span>`;
+}
+
+tbody.innerHTML += `
+<tr>
+<td>${s.date}</td>
+<td>${c.name}</td>
+<td>${p.name} (${s.qty}x)</td>
+<td>R$ ${s.total.toFixed(2)}</td>
+<td>${s.payment}</td>
+<td>${badge}</td>
+<td>${actionBtn}</td>
+</tr>
+`;
+});
+}
+
+function markAsPaid(sId) {
+const s = sales.find(sale => sale.id === sId);
+if(s) { s.status = 'Pago'; saveData(); renderSalesMonth(); }
+}
+
+// CONSIGNADO
+function renderConsignado() {
+const tbody = document.getElementById('consignadoTable');
+tbody.innerHTML = '';
+const inHome = sales.filter(s => s.status === 'Em Provador');
+
+if(inHome.length === 0) {
+tbody.innerHTML = `<tr><td colspan="5" class="empty-msg">Nenhuma peça em provador no momento.</td></tr>`;
+return;
+}
+
+inHome.forEach(s => {
+const c = clients.find(cli => cli.id === s.clientId) || {};
+const p = products.find(prod => prod.id === s.productId) || {};
+tbody.innerHTML += `
+<tr>
+<td><strong>${c.name}</strong></td>
+<td>${c.phone || '-'}</td>
+<td>${p.name}</td>
+<td>${s.date}</td>
+<td>
+<button class="btn-action" style="padding:4px 8px; font-size:0.75rem;" onclick="resolveHome(${s.id}, 'vendido')">Comprou</button>
+<button class="btn-secondary" style="padding:4px 8px; font-size:0.75rem;" onclick="resolveHome(${s.id}, 'devolveu')">Devolveu</button>
+</td>
+</tr>
+`;
+});
+}
+
+function resolveHome(sId, action) {
+const s = sales.find(sale => sale.id === sId);
+const p = products.find(prod => prod.id === s.productId);
+
+if(action === 'vendido') {
+s.status = 'Pago';
+s.payment = 'Dinheiro / Efetuado';
+alert("Peça confirmada como vendida!");
+} else {
+if(p) p.stock += s.qty;
+const idx = sales.findIndex(sale => sale.id === sId);
+sales.splice(idx, 1);
+alert("Peça devolvida ao estoque com sucesso!");
+}
+saveData();
+renderConsignado();
+}
+
+// EXPORTAR PLANILHA CSV
+function exportToCSV() {
+if(sales.length === 0) return alert("Não há registros de vendas para exportar.");
+
+let csv = 'Data;Cliente;Produto;Quantidade;Total (R$);Pagamento;Status\n';
+sales.forEach(s => {
+const c = clients.find(cli => cli.id === s.clientId) || {};
+const p = products.find(prod => prod.id === s.productId) || {};
+csv += `${s.date};${c.name};${p.name};${s.qty};${s.total.toFixed(2)};${s.payment};${s.status}\n`;
+});
+
+const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+const link = document.createElement("a");
+link.href = URL.createObjectURL(blob);
+link.setAttribute("download", "Vendas_Voce_Linda_Sempre.csv");
+document.body.appendChild(link);
+link.click();
+document.body.removeChild(link);
+}
+
+// CHARTS
+let c1 = null, c2 = null;
+function renderReports() {
+if(c1) c1.destroy();
+const ctx1 = document.getElementById('chartTopProducts').getContext('2d');
+c1 = new Chart(ctx1, {
+type: 'bar',
+data: {
+labels: products.length ? products.map(p => p.name) : ['Nenhum produto'],
+datasets: [{
+label: 'Unidades Vendidas',
+data: products.length ? products.map(p => sales.filter(s => s.productId === p.id).reduce((acc, s) => acc + s.qty, 0)) : [0],
+backgroundColor: '#d32f2f'
+}]
+}
+});
+
+if(c2) c2.destroy();
+const ctx2 = document.getElementById('chartProfitCompare').getContext('2d');
+
+const now = new Date();
+const m1 = `${String(now.getMonth()).padStart(2, '0')}-${now.getFullYear()}`;
+const m2 = `${String(now.getMonth() + 1).padStart(2, '0')}-${now.getFullYear()}`;
+
+c2 = new Chart(ctx2, {
+type: 'line',
+data: {
+labels: ['Mês Anterior', 'Mês Atual'],
+datasets: [{
+label: 'Faturamento Bruto (R$)',
+data: [
+sales.filter(s => s.monthYear === m1).reduce((a, s) => a + s.total, 0),
+sales.filter(s => s.monthYear === m2).reduce((a, s) => a + s.total, 0)
+],
+borderColor: '#2ecc71',
+fill: false
+}]
+}
+});
+}
+
+window.onload = function() {
+setupMonthFilter();
+renderVitrine();
+};
+</script>
+</body>
+</html>
